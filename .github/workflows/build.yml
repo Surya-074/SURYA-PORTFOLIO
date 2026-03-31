@@ -25,14 +25,30 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        if: ${{ github.ref_name != 'readme-only' }}
         run: npm install
 
       - name: Build project
+        if: ${{ github.ref_name != 'readme-only' }}
         run: npm run build
 
       - name: Upload build output
-        if: success()
+        if: ${{ github.ref_name != 'readme-only' && success() }}
         uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist
+
+      - name: Deploy docs to GitHub Pages
+        if: ${{ github.ref_name == 'readme-only' }}
+        uses: actions/configure-pages@v4
+
+      - name: Upload docs artifact
+        if: ${{ github.ref_name == 'readme-only' }}
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: docs
+
+      - name: Deploy pages
+        if: ${{ github.ref_name == 'readme-only' }}
+        uses: actions/deploy-pages@v1
